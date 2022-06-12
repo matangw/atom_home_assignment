@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import '../../models/action.dart' as Actions;
 import 'package:home_assignment/screens/home_screen/home_page_model.dart';
 import 'package:home_assignment/screens/home_screen/home_page_view.dart';
 import 'dart:math' as Math;
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePageComponent extends StatefulWidget{
   @override
@@ -92,17 +95,20 @@ class _HomePageComponentState extends State<HomePageComponent> with SingleTicker
   }
 
   @override
-  void animation() {
+  void animation(Actions.Action action) {
+      SharedPreferences.getInstance().then((value) => value.setString(action.type, DateTime.now().toString()));
       _controller.forward();
   }
 
   @override
-  void notifaction() {
+  void notification(Actions.Action action) {
+    SharedPreferences.getInstance().then((value) => value.setString(action.type, DateTime.now().toString()));
     print('notification');
   }
 
   @override
-  void toast() {
+  void toast(Actions.Action action) {
+    SharedPreferences.getInstance().then((value) => value.setString(action.type, DateTime.now().toString()));
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('This is a toast')));
   }
 }
