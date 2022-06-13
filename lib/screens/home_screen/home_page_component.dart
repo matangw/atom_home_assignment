@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:home_assignment/utils/notifications_services.dart';
 import '../../models/action.dart' as Actions;
 import 'package:home_assignment/screens/home_screen/home_page_model.dart';
 import 'package:home_assignment/screens/home_screen/home_page_view.dart';
 import 'dart:math' as Math;
+import 'package:timezone/data/latest.dart 'as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,6 +28,7 @@ class _HomePageComponentState extends State<HomePageComponent> with SingleTicker
   @override
   void initState() {
     model = HomePageModel(this);
+    tz.initializeTimeZones();
     super.initState();
   }
 
@@ -39,8 +44,8 @@ class _HomePageComponentState extends State<HomePageComponent> with SingleTicker
           width: width,
           child: Center(
            child: myButton(
-                   height>width? height*0.1 : height*0.3,
-                   height>width? width *0.6 : width*0.3
+                   height>width? height*0.1 : height*0.2,
+                   height>width? width *0.6 : width*0.4
             ),
 
           ),
@@ -101,14 +106,22 @@ class _HomePageComponentState extends State<HomePageComponent> with SingleTicker
   }
 
   @override
-  void notification(Actions.Action action) {
+  Future<void> notification(Actions.Action action) async{
     SharedPreferences.getInstance().then((value) => value.setString(action.type, DateTime.now().toString()));
-    print('notification');
+    NotificationsServices().showNotification(1, 'Action alert', 'Notification action executed', 1);
   }
 
   @override
   void toast(Actions.Action action) {
     SharedPreferences.getInstance().then((value) => value.setString(action.type, DateTime.now().toString()));
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('This is a toast')));
+  }
+
+  @override
+  void noActionAvailable() {
+   ScaffoldMessenger.of(context).showSnackBar(
+       SnackBar(content: Text('NO ACTION AVAILABLE' ,style: TextStyle(color: Colors.white),),
+         backgroundColor: Colors.red,
+       ));
   }
 }

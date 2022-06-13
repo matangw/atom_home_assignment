@@ -33,9 +33,10 @@ class HomePageModel{
   Future<void> getButtonAction() async{
 
     SharedPreferences sh  = await SharedPreferences.getInstance();
+
     ///weekday filter
     List<Action> avialibleActions = actions.where((action) => action.validDays
-        .contains(GeneralUtils().getDay(DateTime.now()))).toList();
+        .contains(GeneralUtils().getDay(DateTime.now().add(Duration(days: 1))))).toList();
     print('[!] VALID ACTIONS FOR DAY '+ GeneralUtils().getDay(DateTime.now()).toString() +': '
         + avialibleActions.length.toString());
     if(avialibleActions.isEmpty) {executeButtonAction();return;}
@@ -51,16 +52,21 @@ class HomePageModel{
     if(avialibleActions.isEmpty){executeButtonAction();return;}
 
     ///cooldown filter
-    for(var action in actions){
+    List<Action> needCoolDown = [];
+    for(var action in avialibleActions){
       String? dateTimeString = sh.getString(action.type);
       if (dateTimeString==null){continue;}
       print(dateTimeString.toString());
       DateTime lastUpdated =  DateTime.parse(dateTimeString);
       Duration diff = DateTime.now().difference(lastUpdated);
-      if(action.coolDown>diff.inSeconds)
+      print('[!]Diffrence in seconds of '+action.type+' :   ' +diff.inMilliseconds.toString());
+      if(action.coolDown>diff.inMilliseconds)
         {
-          avialibleActions.remove(action);
+          needCoolDown.add(action);
         }
+    }
+    for(var action in needCoolDown){
+      avialibleActions.remove(action);
     }
     print('[!] AFTER COOL DOWN FILTER : '+ avialibleActions.length.toString());
     if(avialibleActions.isEmpty){executeButtonAction();return;}
@@ -76,16 +82,20 @@ class HomePageModel{
 
   void executeButtonAction({Action? action}){
     if(action==null){
+      view.noActionAvailable();
       return;
     }
     if(action.type=='animation'){
       view.animation(action);
+      return;
     }
     if(action.type=='toast'){
       view.toast(action);
+      return;
     }
     if(action.type=='notification'){
       view.notification(action);
+      return;
     }
   }
 
