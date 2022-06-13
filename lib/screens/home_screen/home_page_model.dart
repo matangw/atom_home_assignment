@@ -36,7 +36,7 @@ class HomePageModel{
 
     ///weekday filter
     List<Action> avialibleActions = actions.where((action) => action.validDays
-        .contains(GeneralUtils().getDay(DateTime.now().add(Duration(days: 1))))).toList();
+        .contains(GeneralUtils().getDay(DateTime.now()))).toList();
     print('[!] VALID ACTIONS FOR DAY '+ GeneralUtils().getDay(DateTime.now()).toString() +': '
         + avialibleActions.length.toString());
     if(avialibleActions.isEmpty) {executeButtonAction();return;}
