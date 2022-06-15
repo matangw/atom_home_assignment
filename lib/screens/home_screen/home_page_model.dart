@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:home_assignment/screens/home_screen/home_page_view.dart';
-import 'package:home_assignment/utils/general)utils.dart';
+import 'package:home_assignment/utils/generalUtils.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/action.dart';
@@ -86,15 +86,15 @@ class HomePageModel{
       return;
     }
     if(action.type=='animation'){
-      view.animation(action);
+      view.animation(action.type);
       return;
     }
     if(action.type=='toast'){
-      view.toast(action);
+      view.toast(action.type);
       return;
     }
     if(action.type=='notification'){
-      view.notification(action);
+      view.notification(action.type);
       return;
     }
   }

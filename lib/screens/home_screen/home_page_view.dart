@@ -8,7 +8,7 @@ abstract class HomePageView{
 
   void noActionAvailable();
 
-  void animation(Action animationAction);
-  void toast(Action toastAction);
-  void notification(Action notifictionAction);
+  void animation(String animationAction);
+  void toast(String toastAction);
+  void notification(String notifictionAction);
 }

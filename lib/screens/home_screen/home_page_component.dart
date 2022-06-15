@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:home_assignment/utils/notifications_services.dart';
+import 'package:workmanager/workmanager.dart';
 import '../../models/action.dart' as Actions;
 import 'package:home_assignment/screens/home_screen/home_page_model.dart';
 import 'package:home_assignment/screens/home_screen/home_page_view.dart';
 import 'dart:math' as Math;
-import 'package:timezone/data/latest.dart 'as tz;
+import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,6 +20,7 @@ class _HomePageComponentState extends State<HomePageComponent> with SingleTicker
 
   late HomePageModel model;
   late final AnimationController _controller = AnimationController(vsync: this, duration: Duration(seconds: 2));
+  NotificationsServices notificationsServices = NotificationsServices();
 
   //params:
   bool loading = true;
@@ -37,6 +39,12 @@ class _HomePageComponentState extends State<HomePageComponent> with SingleTicker
     print(DateTime.wednesday.toString());
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+    notificationsServices.flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails().then((value) => {
+        print( value?.didNotificationLaunchApp.toString() ),
+        if(value?.didNotificationLaunchApp==true){
+          animation('animation')
+        }
+      });
     return Scaffold(
       body: loading? Container(height: height,width: width,child: const CircularProgressIndicator(),) : SingleChildScrollView(
         child: SizedBox(
@@ -100,20 +108,21 @@ class _HomePageComponentState extends State<HomePageComponent> with SingleTicker
   }
 
   @override
-  void animation(Actions.Action action) {
-      SharedPreferences.getInstance().then((value) => value.setString(action.type, DateTime.now().toString()));
+  void animation(String action) {
+      SharedPreferences.getInstance().then((value) => value.setString(action, DateTime.now().toString()));
       _controller.forward();
   }
 
   @override
-  Future<void> notification(Actions.Action action) async{
-    SharedPreferences.getInstance().then((value) => value.setString(action.type, DateTime.now().toString()));
-    NotificationsServices().showNotification(1, 'Action alert', 'Notification action executed', 1);
+  Future<void> notification(String action) async{
+    SharedPreferences.getInstance().then((value) => value.setString(action, DateTime.now().toString()));
+    notificationsServices.showNotification(2, 'Action alert', 'Notification action executed', 5);
+
   }
 
   @override
-  void toast(Actions.Action action) {
-    SharedPreferences.getInstance().then((value) => value.setString(action.type, DateTime.now().toString()));
+  void toast(String action) {
+    SharedPreferences.getInstance().then((value) => value.setString(action, DateTime.now().toString()));
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('This is a toast')));
   }
 
