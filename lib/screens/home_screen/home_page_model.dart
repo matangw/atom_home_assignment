@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:home_assignment/screens/home_screen/home_page_view.dart';
-import 'package:home_assignment/utils/general)utils.dart';
+import 'package:home_assignment/utils/generalUtils.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/action.dart';
 
 class HomePageModel{
@@ -29,7 +30,10 @@ class HomePageModel{
   }
 
 
-  void getButtonAction(){
+  Future<void> getButtonAction() async{
+
+    SharedPreferences sh  = await SharedPreferences.getInstance();
+
     ///weekday filter
     List<Action> avialibleActions = actions.where((action) => action.validDays
         .contains(GeneralUtils().getDay(DateTime.now()))).toList();
@@ -47,6 +51,26 @@ class HomePageModel{
     print('[!] ENABLED ACTIONS: '+ avialibleActions.length.toString());
     if(avialibleActions.isEmpty){executeButtonAction();return;}
 
+    ///cooldown filter
+    List<Action> needCoolDown = [];
+    for(var action in avialibleActions){
+      String? dateTimeString = sh.getString(action.type);
+      if (dateTimeString==null){continue;}
+      print(dateTimeString.toString());
+      DateTime lastUpdated =  DateTime.parse(dateTimeString);
+      Duration diff = DateTime.now().difference(lastUpdated);
+      print('[!]Diffrence in seconds of '+action.type+' :   ' +diff.inMilliseconds.toString());
+      if(action.coolDown>diff.inMilliseconds)
+        {
+          needCoolDown.add(action);
+        }
+    }
+    for(var action in needCoolDown){
+      avialibleActions.remove(action);
+    }
+    print('[!] AFTER COOL DOWN FILTER : '+ avialibleActions.length.toString());
+    if(avialibleActions.isEmpty){executeButtonAction();return;}
+
     /// sort by priority
     avialibleActions.sort((a, b) => b.priority.compareTo(a.priority));
     print(avialibleActions[0].type);
@@ -58,16 +82,20 @@ class HomePageModel{
 
   void executeButtonAction({Action? action}){
     if(action==null){
+      view.noActionAvailable();
       return;
     }
     if(action.type=='animation'){
-      view.animation();
+      view.animation(action.type);
+      return;
     }
     if(action.type=='toast'){
-      view.toast();
+      view.toast(action.type);
+      return;
     }
     if(action.type=='notification'){
-      view.notifaction();
+      view.notification(action.type);
+      return;
     }
   }
 
